@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include "zoneclass.h"
 
 ZoneClass::ZoneClass()
@@ -8,6 +9,7 @@ ZoneClass::ZoneClass()
 	m_Position = 0;
 	m_Terrain = 0;
 	m_frameTime = 0;
+	angle = 0;
 }
 
 ZoneClass::ZoneClass(const ZoneClass& other)
@@ -67,8 +69,8 @@ bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int s
 		return false;
 	}
 
-	// Set the initial position and rotation.
-	m_Position->SetPosition(128.0f, 10.0f, -10.0f);
+	// Set the initial position and rotation the terrain x(from 0 to 256)and z(0 to 256).
+	m_Position->SetPosition(128.0f, 10.0f, 128.0f);
 	m_Position->SetRotation(0.0f, 0.0f, 0.0f);
 
 	// Create the terrain object.
@@ -118,7 +120,6 @@ void ZoneClass::Shutdown()
 		delete m_Light;
 		m_Light = 0;
 	}
-
 	// Release the camera object.
 	if(m_Camera)
 	{
@@ -145,12 +146,9 @@ bool ZoneClass::Frame(D3DClass* Direct3D, InputClass* Input, ShaderManagerClass*
 
 	// Do the frame input processing.
 	HandleMovementInput(Input, frameTime);
-
 	//Move the light
 	LightMovement(frameTime);
-	//m_Light->SetDirection(dx, -1.0f, dz);
 
-	
 	// Get the view point position/rotation.
 	m_Position->GetPosition(posX, posY, posZ);
 	m_Position->GetRotation(rotX, rotY, rotZ);
@@ -249,49 +247,49 @@ void ZoneClass::HandleMovementInput(InputClass* Input, float frameTime)
 
 void ZoneClass::LightMovement(float frameTime)
 {
-	float phi, dX, dZ, radius;
+	float dX, dZ, radius;
 	XMFLOAT3 lightDirection;
 
 	lightDirection = m_Light->GetDirection();
 	dZ = 0.0f;
 	dX = 0.0f;
 
-	//Radius
-	radius = sqrtf((lightDirection.z *lightDirection.z) + (lightDirection.x * lightDirection.x));
+	radius = sqrtf(pow(lightDirection.x,2) + pow(lightDirection.z, 2));
+	//Angle increments = speed of rotation
+	angle += (0.1f / 180.0f)*  M_PI;
 
-	phi = atanf((0.0f-lightDirection.x) / (0.0f-lightDirection.z));
-	
-
-	if (phi > 0.0f)
+	if (angle >= 0.0f && angle < ((90.0f/180.0f) * M_PI) )
 	{
-
-		phi = phi + 0.01f;
-		dX = radius * sinf(phi);
-		dZ = radius * cosf(phi);
+		//first quadrant
+		dX = 0.0f + cosf(angle)*radius;
+		dZ = 0.0f + sinf(angle)*radius;
 		m_Light->SetDirection(dX, -1.0f, dZ);
 	}
-
-	if (phi < 0.0f)
+	if (angle > ((90.0f / 180.0f) * M_PI) && angle < ((180.0f / 180.0f) * M_PI))
 	{
-		phi = phi + 0.01f;
-		dX = radius * sinf(phi);
-		dZ = radius * cosf(phi);
+		//second quadrant
+		dX = 0.0f + cosf(angle)*radius;
+		dZ = 0.0f + sinf(angle)*radius;
 		m_Light->SetDirection(dX, -1.0f, dZ);
 	}
-
-	//if (0.0f - lightDirection.z > 0)
-	//{
-	//	phi = phi + 3.1415f;
-	//}
-	//if (lightDirection.z = 0)
-	//{
-	//	phi = phi - 3.1415f;
-	//}
-	//dX = sinf(phi);
-	//dZ = cosf(phi);
-
-	/*m_Light->SetDirection(dX, -1.0f, dZ);*/
-
+	if (angle > ((180.0f / 180.0f) * M_PI) && angle < ((270.0f / 180.0f) * M_PI))
+	{
+		//third quadrant
+		dX = 0.0f + cosf(angle)*radius;
+		dZ = 0.0f + sinf(angle)*radius;
+		m_Light->SetDirection(dX, -1.0f, dZ);
+	}
+	if (angle > ((270.0f / 180.0f) * M_PI) && angle <= ((360.0f / 180.0f) * M_PI))
+	{
+		//fourth quadrant
+		dX = 0.0f + cosf(angle)*radius;
+		dZ = 0.0f + sinf(angle)*radius;
+		m_Light->SetDirection(dX, -1.0f, dZ);		
+	}
+	if (angle > ((360.0f / 180.0f) * M_PI))
+	{
+	angle = 0.0f;
+	}
 	return;
 }
 

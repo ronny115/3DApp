@@ -34,6 +34,6 @@ private:
 	TerrainClass* m_Terrain;
 	bool m_displayUI, m_wireFrame;
 	float m_frameTime;
+	float angle;
 };
-
 #endif
