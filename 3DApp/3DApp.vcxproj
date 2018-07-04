@@ -164,6 +164,7 @@
     <ClInclude Include="soundclass.h" />
     <ClInclude Include="systemclass.h" />
     <ClInclude Include="terrainclass.h" />
+    <ClInclude Include="terrainShaderClass.h" />
     <ClInclude Include="textureshaderclass.h" />
     <ClInclude Include="textclass.h" />
     <ClInclude Include="textureclass.h" />
@@ -190,6 +191,7 @@
     <ClCompile Include="Soundclass.cpp" />
     <ClCompile Include="Systemclass.cpp" />
     <ClCompile Include="Terrainclass.cpp" />
+    <ClCompile Include="Terrainshaderclass.cpp" />
     <ClCompile Include="Textureshaderclass.cpp" />
     <ClCompile Include="Textclass.cpp" />
     <ClCompile Include="Textureclass.cpp" />
@@ -257,6 +259,12 @@
       <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DisableOptimizations>
     </None>
     <None Include="Terrain.ps">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Texture.ps">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Texture.vs">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </None>
   </ItemGroup>

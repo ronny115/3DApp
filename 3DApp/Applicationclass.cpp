@@ -85,13 +85,13 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		return false;
 	}
 	//load textures into texture manager
-	result = m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/texture/tile_test.tga", 0);
-	if (!result)
-	{
-		return false;
-	}
+	//result = m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/texture/tile_test.tga", 0);
+	//if (!result)
+	//{
+	//	return false;
+	//}
 
-	result = m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/texture/dirt01d.tga", 1);
+	result = m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/texture/dirt01d.tga", 0);
 	if (!result)
 	{
 	return false;

@@ -114,6 +114,9 @@
     <ClInclude Include="lightclass.h">
       <Filter>Header Files\Light</Filter>
     </ClInclude>
+    <ClInclude Include="terrainShaderClass.h">
+      <Filter>Header Files\Texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="3DApp.cpp">
@@ -188,6 +191,9 @@
     <ClCompile Include="lightclass.cpp">
       <Filter>Source Files\Light</Filter>
     </ClCompile>
+    <ClCompile Include="Terrainshaderclass.cpp">
+      <Filter>Source Files\Texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Color.vs">
@@ -214,6 +220,12 @@
       <Filter>Source Files\Shaders</Filter>
     </None>
     <None Include="Light.vs">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="Texture.vs">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="Texture.ps">
       <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>

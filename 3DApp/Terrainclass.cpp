@@ -7,6 +7,7 @@ TerrainClass::TerrainClass()
 	m_terrainFilename = 0;
 	m_heightMap = 0;
 	m_terrainModel = 0;
+	m_colorMapFilename = 0;
 }
 
 TerrainClass::TerrainClass(const TerrainClass& other)
@@ -41,6 +42,13 @@ bool TerrainClass::Initialize(ID3D11Device* device, char* setupFilename)
 	// Calculate the normals for the terrain data.
 	result = CalculateNormals();
 	if(!result)
+	{
+		return false;
+	}
+
+	//load in the color map fo the terrain
+	result = LoadColorMap();
+	if (!result)
 	{
 		return false;
 	}
@@ -101,7 +109,7 @@ bool TerrainClass::LoadSetupFile(char* filename)
 	ifstream fin;
 	char input;
 
-	// Initialize the string that will hold the terrain file name.
+	// Initialize the string that will hold the terrain file name and colormap filename.
 	stringLength = 256;
 	m_terrainFilename = new char[stringLength];
 	if(!m_terrainFilename)
@@ -109,6 +117,11 @@ bool TerrainClass::LoadSetupFile(char* filename)
 		return false;
 	}
 
+	m_colorMapFilename = new char[stringLength];
+	if (!m_colorMapFilename)
+	{
+		return false;
+	}
 	// Open the setup file.  If it could not open the file then exit.
 	fin.open(filename);
 	if(fin.fail())
@@ -155,7 +168,13 @@ bool TerrainClass::LoadSetupFile(char* filename)
 
 	// Read in the terrain height scaling.
 	fin >> m_heightScale;
-
+	// read up the to the color filename
+	fin.get(input);
+	while (input != ':')
+	{
+		fin.get(input);
+	}
+	fin >> m_colorMapFilename;
 	// Close the setup file.
 	fin.close();
 
@@ -267,6 +286,86 @@ bool TerrainClass::LoadBitmapHeightMap()
 	delete [] m_terrainFilename;
 	m_terrainFilename = 0;
 
+	return true;
+}
+
+bool TerrainClass::LoadColorMap()
+{
+	int error, imgSize, i, j, k, index;
+	FILE*filePtr;
+	unsigned long long count;
+	BITMAPFILEHEADER bitmapFileHeader;
+	BITMAPINFOHEADER bitmapInfoHeader;
+	unsigned char *bitmapImage;
+	//open the color map file in binary
+	error = fopen_s(&filePtr, m_colorMapFilename, "rb");
+	if (error != 0)
+	{
+		return false;
+	}
+	//read in the file header
+	count = fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr);
+	if (count != 1)
+	{
+		return false;
+	}
+	//read the file info header
+	count = fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, filePtr);
+	if (count != 1)
+	{
+		return false;
+	}
+	//make sure the color map dimensions are the same as the terrain dimension fonr 1 to 1 mapping
+	if ((bitmapInfoHeader.biWidth != m_terrainWidth)||(bitmapInfoHeader.biHeight != m_terrainHeight))
+	{
+		return false;
+	}
+	//calculate the size of the bitmap image data, since s 257x257 need to add extrebyte to each line
+	imgSize = m_terrainHeight * ((m_terrainWidth * 3) + 1);
+	//allocate memory for the bitmap image data
+	bitmapImage = new unsigned char[imgSize];
+	if (!bitmapImage)
+	{
+		return false;
+	}
+	//move to the beginning of the bitmap data
+	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
+	//read in the bitmap image data
+	count = fread(bitmapImage, 1, imgSize, filePtr);
+	if (count != imgSize)
+	{
+		return false;
+	}
+	//close the file
+	error = fclose(filePtr);
+	if(error != 0)
+	{
+		return false;
+	}
+	//initalize the position un the image data buffer
+	k = 0;
+	//read the image data info the color map portion of the height map structure.
+	for (j = 0; j < m_terrainHeight; j++)
+	{
+		for (i = 0; i < m_terrainWidth; i++)
+		{
+			//bitmaps are upside down so load from bottom to top into the array
+			index = (m_terrainWidth*(m_terrainHeight - 1 - j)) + i;
+
+			m_heightMap[index].b = (float)bitmapImage[k] / 255.0f;
+			m_heightMap[index].g = (float)bitmapImage[k+1] / 255.0f;
+			m_heightMap[index].r = (float)bitmapImage[k+2] / 255.0f;
+			k += 3;
+		}
+		//compensate for extra byte at end of each line in a non 2by 2 bitmaps (257x257)
+		k++;
+	}
+	//release the bitmap image data
+	delete [] bitmapImage;
+	bitmapImage = 0;
+	//release the color map filename now that is has been read in
+	delete[] m_colorMapFilename;
+	m_colorMapFilename = 0;
 	return true;
 }
 
@@ -478,6 +577,9 @@ bool TerrainClass::BuildTerrainModel()
 			m_terrainModel[index].nx = m_heightMap[index1].nx;
 			m_terrainModel[index].ny = m_heightMap[index1].ny;
 			m_terrainModel[index].nz = m_heightMap[index1].nz;
+			m_terrainModel[index].r = m_heightMap[index1].r;
+			m_terrainModel[index].g = m_heightMap[index1].g;
+			m_terrainModel[index].b = m_heightMap[index1].b;
 			index++;
 
 			// Triangle 1 - Upper right.
@@ -489,6 +591,9 @@ bool TerrainClass::BuildTerrainModel()
 			m_terrainModel[index].nx = m_heightMap[index2].nx;
 			m_terrainModel[index].ny = m_heightMap[index2].ny;
 			m_terrainModel[index].nz = m_heightMap[index2].nz;
+			m_terrainModel[index].r = m_heightMap[index2].r;
+			m_terrainModel[index].g = m_heightMap[index2].g;
+			m_terrainModel[index].b = m_heightMap[index2].b;
 			index++;
 
 			// Triangle 1 - Bottom left.
@@ -500,6 +605,9 @@ bool TerrainClass::BuildTerrainModel()
 			m_terrainModel[index].nx = m_heightMap[index3].nx;
 			m_terrainModel[index].ny = m_heightMap[index3].ny;
 			m_terrainModel[index].nz = m_heightMap[index3].nz;
+			m_terrainModel[index].r = m_heightMap[index3].r;
+			m_terrainModel[index].g = m_heightMap[index3].g;
+			m_terrainModel[index].b = m_heightMap[index3].b;
 			index++;
 
 			// Triangle 2 - Bottom left.
@@ -511,6 +619,9 @@ bool TerrainClass::BuildTerrainModel()
 			m_terrainModel[index].nx = m_heightMap[index3].nx;
 			m_terrainModel[index].ny = m_heightMap[index3].ny;
 			m_terrainModel[index].nz = m_heightMap[index3].nz;
+			m_terrainModel[index].r = m_heightMap[index3].r;
+			m_terrainModel[index].g = m_heightMap[index3].g;
+			m_terrainModel[index].b = m_heightMap[index3].b;
 			index++;
 
 			// Triangle 2 - Upper right.
@@ -522,6 +633,9 @@ bool TerrainClass::BuildTerrainModel()
 			m_terrainModel[index].nx = m_heightMap[index2].nx;
 			m_terrainModel[index].ny = m_heightMap[index2].ny;
 			m_terrainModel[index].nz = m_heightMap[index2].nz;
+			m_terrainModel[index].r = m_heightMap[index2].r;
+			m_terrainModel[index].g = m_heightMap[index2].g;
+			m_terrainModel[index].b = m_heightMap[index2].b;
 			index++;
 
 			// Triangle 2 - Bottom right.
@@ -533,6 +647,9 @@ bool TerrainClass::BuildTerrainModel()
 			m_terrainModel[index].nx = m_heightMap[index4].nx;
 			m_terrainModel[index].ny = m_heightMap[index4].ny;
 			m_terrainModel[index].nz = m_heightMap[index4].nz;
+			m_terrainModel[index].r = m_heightMap[index4].r;
+			m_terrainModel[index].g = m_heightMap[index4].g;
+			m_terrainModel[index].b = m_heightMap[index4].b;
 			index++;
 		}
 	}
@@ -587,6 +704,7 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device)
 		vertices[i].position = XMFLOAT3(m_terrainModel[i].x, m_terrainModel[i].y, m_terrainModel[i].z);
 		vertices[i].texture = XMFLOAT2(m_terrainModel[i].tu, m_terrainModel[i].tv);
 		vertices[i].normal = XMFLOAT3(m_terrainModel[i].nx, m_terrainModel[i].ny, m_terrainModel[i].nz);
+		vertices[i].color = XMFLOAT3(m_terrainModel[i].r, m_terrainModel[i].g, m_terrainModel[i].b);
 		indices[i] = i;
 	}
 
@@ -658,7 +776,6 @@ void TerrainClass::ShutdownBuffers()
 
 	return;
 }
-
 
 void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 {
