@@ -59,10 +59,9 @@ void SoundClass::Play()
 void SoundClass::Shutdown()
 {
 
-	result = m_sound1->release();
-	result = m_sound1->release();
+	m_system->release();
 	//result = m_sound2->release();
 	//result = m_sound3->release();
-	result = m_system->close();
-	result = m_system->release();
+	//result = m_system->close();
+	//m_system->release();
 }

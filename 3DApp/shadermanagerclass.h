@@ -6,6 +6,7 @@
 #include "textureshaderclass.h"
 #include "lightshaderclass.h"
 #include "fontshaderclass.h"
+#include "SkyDomeShaderClass.h"
 #include "terrainShaderClass.h"
 
 class ShaderManagerClass
@@ -22,7 +23,8 @@ public:
 	bool RenderTextureShader(ID3D11DeviceContext*, int, XMMATRIX, XMMATRIX, XMMATRIX, ID3D11ShaderResourceView*);
 	bool RenderLightShader(ID3D11DeviceContext*, int, XMMATRIX, XMMATRIX, XMMATRIX, ID3D11ShaderResourceView*, XMFLOAT3, XMFLOAT4);
 	bool RenderFontShader(ID3D11DeviceContext*, int, XMMATRIX, XMMATRIX, XMMATRIX, ID3D11ShaderResourceView*, XMFLOAT4);
-	bool RenderTerrainShader(ID3D11DeviceContext*, int, XMMATRIX, XMMATRIX, XMMATRIX, ID3D11ShaderResourceView*, XMFLOAT3, XMFLOAT4);
+	bool RenderTerrainShader(ID3D11DeviceContext*, int, XMMATRIX, XMMATRIX, XMMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, XMFLOAT3, XMFLOAT4);
+	bool RenderSkyDomeShader(ID3D11DeviceContext*, int, XMMATRIX,XMMATRIX,XMMATRIX,XMFLOAT4,XMFLOAT4);
 
 private:
 	ColorShaderClass* m_ColorShader;
@@ -30,6 +32,7 @@ private:
 	LightShaderClass* m_LightShader;
 	FontShaderClass* m_FontShader;
 	TerrainShaderClass* m_TerrainShader;
+	SkyDomeShaderClass* m_SkyDomeShader;
 };
 
 #endif

@@ -21,7 +21,6 @@ TerrainClass::~TerrainClass()
 bool TerrainClass::Initialize(ID3D11Device* device, char* setupFilename)
 {
 	bool result;
-
 	// Get the terrain filename, dimensions, and so forth from the setup file.
 	result = LoadSetupFile(setupFilename);
 	if(!result)
@@ -52,6 +51,9 @@ bool TerrainClass::Initialize(ID3D11Device* device, char* setupFilename)
 	{
 		return false;
 	}
+
+	//calculate the tangent and binormal for the terrain model
+	CalculatTerrainVectors();
 
 	// Now build the 3D model of the terrain.
 	result = BuildTerrainModel();
@@ -657,6 +659,131 @@ bool TerrainClass::BuildTerrainModel()
 	return true;
 }
 
+void TerrainClass::CalculatTerrainVectors()
+{
+	int faceCount, i, index;
+	TempVertexType vertex1, vertex2, vertex3;
+	VectorType tangent, binormal;
+
+	//calculate the number of faces in the terrain model
+	faceCount = m_vertexCount / 3;
+	index = 0;
+	//go through all the faces and calculate the tangent binormal and normal vectors
+	for (i = 0; i < faceCount; i++)
+	{
+		//get the three vertices for this face from the terrain model
+		vertex1.x = m_terrainModel[index].x;
+		vertex1.y = m_terrainModel[index].y;
+		vertex1.z = m_terrainModel[index].z;
+		vertex1.tu= m_terrainModel[index].tu;
+		vertex1.tv= m_terrainModel[index].tv;
+		vertex1.nx = m_terrainModel[index].nx;
+		vertex1.ny = m_terrainModel[index].ny;
+		vertex1.nz= m_terrainModel[index].nz;
+		index++;
+
+		vertex2.x = m_terrainModel[index].x;
+		vertex2.y = m_terrainModel[index].y;
+		vertex2.z = m_terrainModel[index].z;
+		vertex2.tu = m_terrainModel[index].tu;
+		vertex2.tv = m_terrainModel[index].tv;
+		vertex2.nx = m_terrainModel[index].nx;
+		vertex2.ny = m_terrainModel[index].ny;
+		vertex2.nz = m_terrainModel[index].nz;
+		index++;
+
+		vertex3.x = m_terrainModel[index].x;
+		vertex3.y = m_terrainModel[index].y;
+		vertex3.z = m_terrainModel[index].z;
+		vertex3.tu = m_terrainModel[index].tu;
+		vertex3.tv = m_terrainModel[index].tv;
+		vertex3.nx = m_terrainModel[index].nx;
+		vertex3.ny = m_terrainModel[index].ny;
+		vertex3.nz = m_terrainModel[index].nz;
+		index++;
+
+		//calculate the tangent and binormal of that face
+		CalculateTangentBinormal(vertex1, vertex2, vertex3, tangent, binormal);
+
+		//store the tangent dand binromal for this face back in the model structure
+		m_terrainModel[index - 1].tx = tangent.x;
+		m_terrainModel[index - 1].ty = tangent.y;
+		m_terrainModel[index - 1].tz = tangent.z;
+		m_terrainModel[index - 1].bx = binormal.x;
+		m_terrainModel[index - 1].by = binormal.y;
+		m_terrainModel[index - 1].bz = binormal.z;
+
+		m_terrainModel[index - 2].tx = tangent.x;
+		m_terrainModel[index - 2].ty = tangent.y;
+		m_terrainModel[index - 2].tz = tangent.z;
+		m_terrainModel[index - 2].bx = binormal.x;
+		m_terrainModel[index - 2].by = binormal.y;
+		m_terrainModel[index - 2].bz = binormal.z;
+
+		m_terrainModel[index - 3].tx = tangent.x;
+		m_terrainModel[index - 3].ty = tangent.y;
+		m_terrainModel[index - 3].tz = tangent.z;
+		m_terrainModel[index - 3].bx = binormal.x;
+		m_terrainModel[index - 3].by = binormal.y;
+		m_terrainModel[index - 3].bz = binormal.z;
+	}
+	return;
+}
+
+void TerrainClass::CalculateTangentBinormal(TempVertexType vertex1, TempVertexType vertex2, TempVertexType vertex3, VectorType& tangent, VectorType& binormal)
+{
+	float vector1[3], vector2[3];
+	float tuVector[2], tvVector[2];
+	float den;
+	float length;
+
+	//calculate the two vectors for this face
+	vector1[0] = vertex2.x - vertex1.x;
+	vector1[1] = vertex2.y - vertex1.y;
+	vector1[2] = vertex2.z - vertex1.z;
+
+	vector2[0] = vertex3.x - vertex1.x;
+	vector2[1] = vertex3.y - vertex1.y;
+	vector2[2] = vertex3.z - vertex1.z;
+
+	//calculate the tu and tv texture space vectors
+	tuVector[0] = vertex2.tu - vertex1.tu;
+	tvVector[0] = vertex2.tv - vertex1.tv;
+
+	tuVector[1] = vertex3.tu - vertex1.tu;
+	tvVector[1] = vertex3.tv - vertex1.tv;
+
+	//calculate the denominator of the tangent/binormal equation
+	den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
+
+	//calculate the cross products and multiply by the coeficient to get the tangent and binormal
+	tangent.x = (tvVector[1] * vector1[0] - tvVector[0] * vector2[0]) * den;
+	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
+	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
+
+	binormal.x = (tuVector[1] * vector2[0] - tuVector[1] * vector1[0]) * den;
+	binormal.y = (tuVector[1] * vector2[1] - tuVector[1] * vector1[1]) * den;
+	binormal.z = (tuVector[1] * vector2[2] - tuVector[1] * vector1[2]) * den;
+
+	//calculate the lenght of the tangent
+	length = (float)sqrt((tangent.x*tangent.x) + (tangent.y*tangent.y) + (tangent.z*tangent.z));
+
+	//normalize the tangent and then store it
+	tangent.x = tangent.x / length;
+	tangent.y = tangent.y / length;
+	tangent.z = tangent.z / length;
+
+	//calculate the lenght of the binormal
+	length = (float)sqrt((binormal.x*binormal.x) + (binormal.y*binormal.y) + (binormal.z*binormal.z));
+
+	//normalize the binromal and then store it
+	binormal.x = binormal.x / length;
+	binormal.y = binormal.y / length;
+	binormal.z = binormal.z / length;
+
+	return;
+}
+
 void TerrainClass::ShutdownTerrainModel()
 {
 	// Release the terrain model data.
@@ -704,6 +831,8 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device)
 		vertices[i].position = XMFLOAT3(m_terrainModel[i].x, m_terrainModel[i].y, m_terrainModel[i].z);
 		vertices[i].texture = XMFLOAT2(m_terrainModel[i].tu, m_terrainModel[i].tv);
 		vertices[i].normal = XMFLOAT3(m_terrainModel[i].nx, m_terrainModel[i].ny, m_terrainModel[i].nz);
+		vertices[i].tangent = XMFLOAT3(m_terrainModel[i].tx, m_terrainModel[i].ty, m_terrainModel[i].tz);
+		vertices[i].binormal = XMFLOAT3(m_terrainModel[i].bx, m_terrainModel[i].by, m_terrainModel[i].bz);
 		vertices[i].color = XMFLOAT3(m_terrainModel[i].r, m_terrainModel[i].g, m_terrainModel[i].b);
 		indices[i] = i;
 	}

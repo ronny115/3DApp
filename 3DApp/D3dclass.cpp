@@ -11,6 +11,7 @@ D3DClass::D3DClass()
 	m_depthStencilView = 0;
 	m_rasterState = 0;
 	m_rasterStateNoCulling = 0;
+	m_rasterStateNoCullingWireframe = 0;
 	m_rasterStateWireframe = 0;
 	m_depthDisabledStencilState = 0;
 	m_alphaEnableBlendingState = 0;
@@ -324,7 +325,6 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 	
 	// Setup a raster description which turns off back face culling.
 	rasterDesc.CullMode = D3D11_CULL_NONE;
-
 	// Create the no culling rasterizer state.
 	result = m_device->CreateRasterizerState(&rasterDesc, &m_rasterStateNoCulling);
 	if (FAILED(result))
@@ -350,7 +350,14 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 	{
 		return false;
 	}
-
+	// Set up a raster description wich turn of back face culling and makeits wireframed
+	rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+	result = m_device->CreateRasterizerState(&rasterDesc, &m_rasterStateNoCullingWireframe);
+	if (FAILED(result))
+	{
+		return false;
+	}
 	// Setup the viewport for rendering.
     viewport.Width = (float)screenWidth;
     viewport.Height = (float)screenHeight;
@@ -491,6 +498,11 @@ void D3DClass::Shutdown()
 		m_rasterStateWireframe = 0;
 	}
 
+	if (m_rasterStateNoCullingWireframe)
+	{
+		m_rasterStateNoCullingWireframe->Release();
+		m_rasterStateNoCullingWireframe = 0;
+	}
 	if(m_rasterStateNoCulling)
 	{
 		m_rasterStateNoCulling->Release();
@@ -680,6 +692,11 @@ void D3DClass::TurnOffCulling()
 	m_deviceContext->RSSetState(m_rasterStateNoCulling);
 
 	return;
+}
+
+void D3DClass::TurnOffCullingWireframe()
+{
+	m_deviceContext->RSSetState(m_rasterStateNoCullingWireframe);
 }
 
 void D3DClass::EnableAlphaToCoverageBlending()

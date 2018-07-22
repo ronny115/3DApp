@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{56a0b4d1-886f-44d3-8c13-9bb6a05cdec5}</UniqueIdentifier>
     </Filter>
@@ -40,6 +36,27 @@
     <Filter Include="Source Files\Light">
       <UniqueIdentifier>{26b29f9b-ce47-40a6-8cc7-57708b9f6876}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Terrain">
+      <UniqueIdentifier>{4937192d-1c10-4e4d-96cc-fea8f4ba7a72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Terrain">
+      <UniqueIdentifier>{2e621914-7eb2-48b4-a2a5-2dd31c7caa65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders">
+      <UniqueIdentifier>{be70a44e-d881-4c5c-986c-b2f702414fb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Skydome">
+      <UniqueIdentifier>{1ca30151-b171-4707-b03e-46e98abf9396}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Skydome">
+      <UniqueIdentifier>{9fcf45ce-b4e5-4856-8c24-43cbeb2fef79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MathHelpers">
+      <UniqueIdentifier>{ee9c7b99-6a15-456c-92d0-69d7ab4d471a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MathHelpers">
+      <UniqueIdentifier>{2e716f41-9137-45ba-a82d-4bcbf2dc233b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -60,13 +77,7 @@
     <ClInclude Include="zoneclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="terrainclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="positionclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="shadermanagerclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="userinterfaceclass.h">
@@ -75,16 +86,7 @@
     <ClInclude Include="cameraclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="colorshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fontshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="fontclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textureclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="textclass.h">
@@ -114,8 +116,32 @@
     <ClInclude Include="lightclass.h">
       <Filter>Header Files\Light</Filter>
     </ClInclude>
-    <ClInclude Include="terrainShaderClass.h">
+    <ClInclude Include="terrainclass.h">
+      <Filter>Header Files\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="colorshaderclass.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="shadermanagerclass.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="fontshaderclass.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="textureclass.h">
       <Filter>Header Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="terrainShaderClass.h">
+      <Filter>Header Files\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyDomeShaderClass.h">
+      <Filter>Header Files\Skydome</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyDomeClass.h">
+      <Filter>Header Files\Skydome</Filter>
+    </ClInclude>
+    <ClInclude Include="VectorsClassHeader.h">
+      <Filter>Header Files\MathHelpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -137,22 +163,10 @@
     <ClCompile Include="Zoneclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Terrainclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Positionclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Colorshaderclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Cameraclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Shadermanagerclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Fontshaderclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Fontclass.cpp">
@@ -162,9 +176,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Textclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Textureclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Fpsclass.cpp">
@@ -191,8 +202,32 @@
     <ClCompile Include="lightclass.cpp">
       <Filter>Source Files\Light</Filter>
     </ClCompile>
-    <ClCompile Include="Terrainshaderclass.cpp">
+    <ClCompile Include="Terrainclass.cpp">
+      <Filter>Source Files\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="Textureclass.cpp">
       <Filter>Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrainshaderclass.cpp">
+      <Filter>Source Files\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="Shadermanagerclass.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Fontshaderclass.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Colorshaderclass.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyDomeShaderClass.cpp">
+      <Filter>Source Files\Skydome</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyDomeClass.cpp">
+      <Filter>Source Files\Skydome</Filter>
+    </ClCompile>
+    <ClCompile Include="VectorsClass.cpp">
+      <Filter>Source Files\MathHelpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -209,24 +244,30 @@
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Terrain.vs">
-      <Filter>Source Files\Shaders</Filter>
+      <Filter>Source Files\Terrain</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Terrain.ps">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="Light.ps">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="Light.vs">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="Texture.vs">
-      <Filter>Source Files\Shaders</Filter>
+      <Filter>Source Files\Terrain</Filter>
     </None>
     <None Include="Texture.ps">
-      <Filter>Source Files\Shaders</Filter>
+      <Filter>Source Files\Texture</Filter>
+    </None>
+    <None Include="Texture.vs">
+      <Filter>Source Files\Texture</Filter>
+    </None>
+    <None Include="Light.ps">
+      <Filter>Source Files\Light</Filter>
+    </None>
+    <None Include="Light.vs">
+      <Filter>Source Files\Light</Filter>
+    </None>
+    <None Include="SkyDome.vs">
+      <Filter>Source Files\Skydome</Filter>
+    </None>
+    <None Include="SkyDome.ps">
+      <Filter>Source Files\Skydome</Filter>
     </None>
   </ItemGroup>
 </Project>

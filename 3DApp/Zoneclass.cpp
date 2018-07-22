@@ -10,6 +10,10 @@ ZoneClass::ZoneClass()
 	m_Terrain = 0;
 	m_frameTime = 0;
 	angle = 0;
+	lerpPercent = 0;
+	linearInterp = 0;
+	sLinearInterp = 0;
+	m_SkyDome = 0;
 }
 
 ZoneClass::ZoneClass(const ZoneClass& other)
@@ -23,15 +27,13 @@ ZoneClass::~ZoneClass()
 bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int screenHeight, float screenDepth)
 {
 	bool result;
-
+	
 	// Create the user interface object.
 	m_UserInterface = new UserInterfaceClass;
 	if(!m_UserInterface)
 	{
 		return false;
 	}
-
-	// Initialize the user interface object.
 	result = m_UserInterface->Initialize(Direct3D, screenHeight, screenWidth);
 	if(!result)
 	{
@@ -45,7 +47,6 @@ bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int s
 	{
 		return false;
 	}
-
 	// Set the initial position of the camera and build the matrices needed for rendering.
 	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
 	m_Camera->Render();
@@ -57,10 +58,7 @@ bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int s
 	{
 		return false;
 	}
-
-	// Initialize the light object.
-	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-	m_Light->SetDirection(-0.5f, -1.0f, -0.5f);
+	m_Light->SetDirection(-0.5f, -1.0f, 0.5f);
 
 	// Create the position object.
 	m_Position = new PositionClass;
@@ -68,7 +66,6 @@ bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int s
 	{
 		return false;
 	}
-
 	// Set the initial position and rotation the terrain x(from 0 to 256)and z(0 to 256).
 	m_Position->SetPosition(128.0f, 10.0f, 128.0f);
 	m_Position->SetRotation(0.0f, 0.0f, 0.0f);
@@ -79,8 +76,6 @@ bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int s
 	{
 		return false;
 	}
-
-	// Initialize the terrain object.
 	result = m_Terrain->Initialize(Direct3D->GetDevice(),"data/setup.txt");
 	if(!result)
 	{
@@ -88,17 +83,48 @@ bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int s
 		return false;
 	}
 
+	//create and initialize the skydome object
+	m_SkyDome = new SkyDomeClass;
+	if(!m_SkyDome)
+	{
+		return false;
+	}
+	result = m_SkyDome->Initialize(Direct3D->GetDevice());
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the skydome object.", L"Error", MB_OK);
+		return false;
+	}
 	// Set the UI to display by default.
 	m_displayUI = true;
 
 	//set wire frame rendering to enabled
 	m_wireFrame = false;
 
+	linearInterp = new Vector3;
+	if (!linearInterp)
+	{
+		return false;
+	}
+
+	sLinearInterp = new Vector2;
+	if (!linearInterp)
+	{
+		return false;
+	}
 	return true;
 }
 
 void ZoneClass::Shutdown()
 {
+	// Release the skydome object.
+	if (m_SkyDome)
+	{
+		m_SkyDome->Shutdown();
+		delete m_SkyDome;
+		m_SkyDome = 0;
+	}
+
 	// Release the terrain object.
 	if(m_Terrain)
 	{
@@ -247,48 +273,129 @@ void ZoneClass::HandleMovementInput(InputClass* Input, float frameTime)
 
 void ZoneClass::LightMovement(float frameTime)
 {
-	float dX, dZ, radius;
+	float dX, dZ, radius, angleIncremet;
 	XMFLOAT3 lightDirection;
-
+	//Sky dome gradients colors
+	Vector3 dawnApexColor = { 0.094f ,0.015f ,0.435f };
+	Vector3 dawnCenterColor = { 0.866f ,0.439f ,0.019f };
+	Vector3 noonApexColor = { 0.0f ,0.337f ,0.756f };
+	Vector3 noonCenterColor = { 0.501f ,0.623f ,0.776f };
+	Vector3 sunsetApexColor = { 0.164f ,0.113f ,0.541f };
+	Vector3 sunsetCenterColor = { 0.596f ,0.286f ,0.035f };
+	Vector3 duskApexColor = { 0.094f ,0.015f ,0.066f };
+	Vector3 duskCenterColor = { 0.125f ,0.109f ,0.239f };
+	//Vectors for spherical linear interpolation
+	Vector2 Firstquadrant = {1.0f,0.0f};
+	Vector2 Secondquadrant = {0.0f,1.0f};
+	Vector2 Thirdquadrant = {1.0f,0.0f};
+	Vector2 Forthquadrant = {0.0f,1.0f};
+	//Difuse colors
+	Vector3 dawnDiffuseColor = { 0.866f,0.439f,0.019f };
+	Vector3 noonDiffuseColor = { 1.00f,1.00f,1.00f };
+	Vector3 sunsetDiffuseColor = { 0.596f ,0.286f ,0.035f };
+	Vector3 duskDiffuseColor = { 0.094f ,0.015f ,0.066f };
+	Vector3 set,setApex,setCenter;
+	Vector2 slerpPercent;
 	lightDirection = m_Light->GetDirection();
 	dZ = 0.0f;
 	dX = 0.0f;
+	//Radius of the light movement
+	radius = sqrtf(pow(lightDirection.x, 2) + pow(lightDirection.y, 2));
+	//Angle increments = speed of light, difuse color and gradient color
+	angleIncremet = 0.05f;
 
-	radius = sqrtf(pow(lightDirection.x,2) + pow(lightDirection.z, 2));
-	//Angle increments = speed of rotation
-	angle += (0.1f / 180.0f)*  M_PI;
-
-	if (angle >= 0.0f && angle < ((90.0f/180.0f) * M_PI) )
+	if (angle >= 0.0f && angle <= ((90.1f/180.0f) * M_PI) )
 	{
+		lerpPercent = (angle / ((90.0f / 180.0f) * (float)M_PI));
 		//first quadrant
 		dX = 0.0f + cosf(angle)*radius;
-		dZ = 0.0f + sinf(angle)*radius;
-		m_Light->SetDirection(dX, -1.0f, dZ);
+		dZ = 0.0f + sinf(angle)*radius*-1.0f;
+		m_Light->SetDirection(dX, dZ, 0.5f);
+		//Interpolate with spherical linear interpolation and use the Y component as percentage for linear interpolate the colors
+		slerpPercent = sLinearInterp->Slerp(Firstquadrant, Secondquadrant, lerpPercent);
+		set = linearInterp->Lerp(dawnDiffuseColor, noonDiffuseColor, slerpPercent.y);
+		setApex = linearInterp->Lerp(dawnApexColor, noonApexColor, slerpPercent.y);
+		setCenter = linearInterp->Lerp(dawnCenterColor, noonCenterColor, slerpPercent.y);
+
+		m_Light->SetDiffuseColor(set.x,set.y,set.z, 1.0f);
+		m_SkyDome->SetApexColor(setApex.x, setApex.y, setApex.z,1.0f);
+		m_SkyDome->SetCenterColor(setCenter.x, setCenter.y, setCenter.z, 1.0f);
+
+		angle += (angleIncremet / 180.0f)*  (float)M_PI;
 	}
-	if (angle > ((90.0f / 180.0f) * M_PI) && angle < ((180.0f / 180.0f) * M_PI))
+	if (angle > ((90.1f / 180.0f) * M_PI) && angle < ((180.0f / 180.0f) * M_PI))
 	{
+		if (lerpPercent > 0.99f)
+		{
+			lerpPercent = 0;
+		}
+		lerpPercent = (angle/ ((90.f / 180.0f) *(float)M_PI))-1;
 		//second quadrant
 		dX = 0.0f + cosf(angle)*radius;
-		dZ = 0.0f + sinf(angle)*radius;
-		m_Light->SetDirection(dX, -1.0f, dZ);
+		dZ = 0.0f + sinf(angle)*radius*-1.0f;
+		m_Light->SetDirection(dX, dZ, 0.5f);
+		//Interpolate with spherical linear interpolation and use the Y component as percentage for linear interpolate the colors
+		slerpPercent = sLinearInterp->Slerp(Secondquadrant, Thirdquadrant, lerpPercent);
+		set = linearInterp->Lerp(sunsetDiffuseColor, noonDiffuseColor, slerpPercent.y);
+		setApex = linearInterp->Lerp(sunsetApexColor, noonApexColor, slerpPercent.y);
+		setCenter = linearInterp->Lerp(sunsetCenterColor, noonCenterColor, slerpPercent.y);
+
+		m_Light->SetDiffuseColor(set.x, set.y, set.z, 1.0f);
+		m_SkyDome->SetApexColor(setApex.x, setApex.y, setApex.z, 1.0f);
+		m_SkyDome->SetCenterColor(setCenter.x, setCenter.y, setCenter.z, 1.0f);
+
+		angle += (angleIncremet / 180.0f)*  (float)M_PI;
 	}
 	if (angle > ((180.0f / 180.0f) * M_PI) && angle < ((270.0f / 180.0f) * M_PI))
 	{
+		if (lerpPercent > 0.99f)
+		{
+			lerpPercent = 0;
+		}
+		lerpPercent = (angle / ((90.f / 180.0f) * (float)M_PI))-2;
 		//third quadrant
 		dX = 0.0f + cosf(angle)*radius;
-		dZ = 0.0f + sinf(angle)*radius;
-		m_Light->SetDirection(dX, -1.0f, dZ);
+		dZ = 0.0f + sinf(angle)*radius*-1.0f;
+		m_Light->SetDirection(dX, dZ, 0.5f);
+		//Interpolate with spherical linear interpolation and use the Y component as percentage for linear interpolate the colors
+		slerpPercent = sLinearInterp->Slerp(Thirdquadrant, Forthquadrant, lerpPercent);
+		set = linearInterp->Lerp(sunsetDiffuseColor, duskDiffuseColor, slerpPercent.y);
+		setApex = linearInterp->Lerp(sunsetApexColor, duskApexColor, slerpPercent.y);
+		setCenter = linearInterp->Lerp(sunsetCenterColor, duskCenterColor, slerpPercent.y);
+
+		m_Light->SetDiffuseColor(set.x, set.y, set.z, 1.0f);
+		m_SkyDome->SetApexColor(setApex.x, setApex.y, setApex.z, 1.0f);
+		m_SkyDome->SetCenterColor(setCenter.x, setCenter.y, setCenter.z, 1.0f);
+
+		angle += (angleIncremet / 180.0f)*  (float)M_PI;
 	}
 	if (angle > ((270.0f / 180.0f) * M_PI) && angle <= ((360.0f / 180.0f) * M_PI))
 	{
+		if (lerpPercent > 0.99f)
+		{
+			lerpPercent = 0;
+		}
+		lerpPercent = (angle / ((90.f / 180.0f) * (float)M_PI))-3;
 		//fourth quadrant
 		dX = 0.0f + cosf(angle)*radius;
-		dZ = 0.0f + sinf(angle)*radius;
-		m_Light->SetDirection(dX, -1.0f, dZ);		
+		dZ = 0.0f + sinf(angle)*radius*-1.0f;
+		m_Light->SetDirection(dX, dZ, 0.5f);
+		//Interpolate with spherical linear interpolation and use the Y component as percentage for linear interpolate the colors
+		slerpPercent = sLinearInterp->Slerp(Forthquadrant, Firstquadrant, lerpPercent);
+		set = linearInterp->Lerp(dawnDiffuseColor, duskDiffuseColor, slerpPercent.y);
+		setApex = linearInterp->Lerp(dawnApexColor, duskApexColor, slerpPercent.y);
+		setCenter = linearInterp->Lerp(dawnCenterColor, duskCenterColor, slerpPercent.y);
+
+		m_Light->SetDiffuseColor(set.x, set.y, set.z, 1.0f);
+		m_SkyDome->SetApexColor(setApex.x, setApex.y, setApex.z, 1.0f);
+		m_SkyDome->SetCenterColor(setCenter.x, setCenter.y, setCenter.z, 1.0f);
+
+		angle += (angleIncremet / 180.0f)*  (float)M_PI;
 	}
 	if (angle > ((360.0f / 180.0f) * M_PI))
 	{
 	angle = 0.0f;
+	lerpPercent = 0.0f;
 	}
 	return;
 }
@@ -297,6 +404,7 @@ bool ZoneClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager, Te
 {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix, baseViewMatrix, orthoMatrix;
 	bool result;
+	XMFLOAT3 cameraPosition;
 
 	// Generate the view matrix based on the camera's position.
 	m_Camera->Render();
@@ -308,26 +416,61 @@ bool ZoneClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager, Te
 	m_Camera->GetBaseViewMatrix(baseViewMatrix);
 	Direct3D->GetOrthoMatrix(orthoMatrix);
 
+	//Get the camera position
+	cameraPosition = m_Camera->GetPosition();
 	
 	// Clear the buffers to begin the scene.
 	Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+	//////////////////
+	//Render Skydome//
+	//////////////////
+	//turn off back face culling and turn off the Zbuffer
+	if (m_wireFrame)
+	{
+		Direct3D->TurnOffCullingWireframe();
+	}
+	else
+	{
+		Direct3D->TurnOffCulling();
+	}
+	Direct3D->TurnZBufferOff();
+	//sky dome centerd arround the camera
+	worldMatrix = XMMatrixTranslation(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+	//render the skydome using the skydome shader
+	m_SkyDome->Render(Direct3D->GetDeviceContext());
+	result = ShaderManager->RenderSkyDomeShader(Direct3D->GetDeviceContext(), m_SkyDome->GetIndexCount(),worldMatrix,viewMatrix,projectionMatrix,m_SkyDome->GetApexColor(),m_SkyDome->GetCenterColor());
+	if (!result)
+	{
+		return false;
+	}
+	//reset the world matrix
+	Direct3D->GetWorldMatrix(worldMatrix);
+	//Turn the zbuffer and culling back on
+	Direct3D->TurnZBufferOn();
+	if (m_wireFrame)
+	{
+		Direct3D->TurnOffCullingWireframe();
+	}
+	else
+	{
+		Direct3D->TurnOnCulling();
+	}
 
 	//turn on the wire frame rendering of the terrain if needed
 	if (m_wireFrame)
 	{
 		Direct3D->EnableWireframe();
 	}
-
-	// Render the terrain
-	//result = ShaderManager->RenderColorShader(Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, 
-	//										  projectionMatrix);
-	//result = ShaderManager->RenderTextureShader(Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix,
-	//										  projectionMatrix, TextureManager->GetTexture(1));
-
+	///////////////////////
+	// Render the terrain//
+	///////////////////////
 	m_Terrain->Render(Direct3D->GetDeviceContext());
+	//result = ShaderManager->RenderColorShader(Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, 
+	//									  projectionMatrix);
+	//result = ShaderManager->RenderTextureShader(Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix,
+	//										  projectionMatrix, TextureManager->GetTexture(0));
 	result = ShaderManager->RenderTerrainShader(Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix,
-		projectionMatrix, TextureManager->GetTexture(0), m_Light->GetDirection(), m_Light->GetDiffuseColor());
-
+		projectionMatrix, TextureManager->GetTexture(0), TextureManager->GetTexture(1), m_Light->GetDirection(), m_Light->GetDiffuseColor());
 	if(!result)
 	{
 		return false;

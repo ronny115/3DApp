@@ -10,6 +10,8 @@
 #include "lightclass.h"
 #include "positionclass.h"
 #include "terrainclass.h"
+#include "SkyDomeClass.h"
+#include "VectorsClassHeader.h"
 
 class ZoneClass
 {
@@ -32,8 +34,12 @@ private:
 	LightClass* m_Light;
 	PositionClass* m_Position;
 	TerrainClass* m_Terrain;
+	SkyDomeClass * m_SkyDome;
+	Vector3 * linearInterp;
+	Vector2 * sLinearInterp;
+
 	bool m_displayUI, m_wireFrame;
 	float m_frameTime;
-	float angle;
+	float angle, lerpPercent;
 };
 #endif

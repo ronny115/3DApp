@@ -17,7 +17,6 @@ TextureManagerClass::~TextureManagerClass()
 bool TextureManagerClass::Initialize(int count)
 {
 	m_textureCount = count;
-
 	// Create the color texture object.
 	m_TextureArray = new TextureClass[m_textureCount];
 	if(!m_TextureArray)

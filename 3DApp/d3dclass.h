@@ -35,6 +35,8 @@ public:
 	void TurnOnCulling();
 	void TurnOffCulling();
 
+	void TurnOffCullingWireframe();
+
 	void EnableAlphaBlending();
 	void EnableAlphaToCoverageBlending();
 	void DisableAlphaBlending();
@@ -55,6 +57,7 @@ private:
 	ID3D11DepthStencilView* m_depthStencilView;
 	ID3D11RasterizerState* m_rasterState;
 	ID3D11RasterizerState* m_rasterStateNoCulling;
+	ID3D11RasterizerState* m_rasterStateNoCullingWireframe;
 	ID3D11RasterizerState* m_rasterStateWireframe;
 	XMMATRIX m_projectionMatrix;
 	XMMATRIX m_worldMatrix;

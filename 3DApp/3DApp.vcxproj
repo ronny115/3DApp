@@ -161,6 +161,8 @@
     <ClInclude Include="lightshaderclass.h" />
     <ClInclude Include="positionclass.h" />
     <ClInclude Include="shadermanagerclass.h" />
+    <ClInclude Include="SkyDomeClass.h" />
+    <ClInclude Include="SkyDomeShaderClass.h" />
     <ClInclude Include="soundclass.h" />
     <ClInclude Include="systemclass.h" />
     <ClInclude Include="terrainclass.h" />
@@ -171,6 +173,7 @@
     <ClInclude Include="texturemanagerclass.h" />
     <ClInclude Include="timerclass.h" />
     <ClInclude Include="userinterfaceclass.h" />
+    <ClInclude Include="VectorsClassHeader.h" />
     <ClInclude Include="zoneclass.h" />
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +191,8 @@
     <ClCompile Include="Lightshaderclass.cpp" />
     <ClCompile Include="Positionclass.cpp" />
     <ClCompile Include="Shadermanagerclass.cpp" />
+    <ClCompile Include="SkyDomeClass.cpp" />
+    <ClCompile Include="SkyDomeShaderClass.cpp" />
     <ClCompile Include="Soundclass.cpp" />
     <ClCompile Include="Systemclass.cpp" />
     <ClCompile Include="Terrainclass.cpp" />
@@ -198,6 +203,7 @@
     <ClCompile Include="Texturemanagerclass.cpp" />
     <ClCompile Include="Timerclass.cpp" />
     <ClCompile Include="Userinterfaceclass.cpp" />
+    <ClCompile Include="VectorsClass.cpp" />
     <ClCompile Include="Zoneclass.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -257,6 +263,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DisableOptimizations>
+    </None>
+    <None Include="SkyDome.ps">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="SkyDome.vs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="Terrain.ps">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
