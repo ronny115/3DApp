@@ -159,6 +159,7 @@
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="lightclass.h" />
     <ClInclude Include="lightshaderclass.h" />
+    <ClInclude Include="ModelParserClassHeader.h" />
     <ClInclude Include="positionclass.h" />
     <ClInclude Include="shadermanagerclass.h" />
     <ClInclude Include="SkyDomeClass.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="Inputclass.cpp" />
     <ClCompile Include="lightclass.cpp" />
     <ClCompile Include="Lightshaderclass.cpp" />
+    <ClCompile Include="ModelParserClass.cpp" />
     <ClCompile Include="Positionclass.cpp" />
     <ClCompile Include="Shadermanagerclass.cpp" />
     <ClCompile Include="SkyDomeClass.cpp" />

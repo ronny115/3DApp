@@ -17,7 +17,7 @@ bool SkyDomeClass::Initialize(ID3D11Device* device)
 {
 	bool result;
 	// load the model
-	result = LoadSkyDomeModel("data/3dmodels/skyDome.txt");
+	result = LoadSkyDomeModel("data/3dmodels/skyDomeModelHigh.obj");
 	if (!result)
 	{
 		return false;
@@ -28,10 +28,7 @@ bool SkyDomeClass::Initialize(ID3D11Device* device)
 	{
 		return false;
 	}
-	//set the color at the top of the skydome rgbAlpha
-	//m_apexColor = XMFLOAT4(1.0f, 0.00f, 0.0f, 1.0f);
-	//set the color at the center of the skydome (horizon)
-	//m_centerColor = XMFLOAT4(0.0f, 0.5f, 0.8f, 1.0f);
+
 	return true;
 }
 
@@ -79,50 +76,24 @@ void SkyDomeClass::SetCenterColor(float red, float green, float blue, float alph
 
 bool SkyDomeClass::LoadSkyDomeModel(char * filename)
 {
-	ifstream fin;
-	char input;
-	int i;
+	ModelParserClass loadSkyDome;
+	int vertexCount, textureCount, normalCount, faceCount;
+	vertexCount = 0; textureCount = 0; normalCount = 0; faceCount = 0;
 
-	//open the file
-	fin.open(filename);
-	//if it could not open the file then exit
-	if (fin.fail())
-	{
-		return false;
-	}
-	//read up to the value of vertex count
-	fin.get(input);
-	while (input != ':')
-	{
-		fin.get(input);
-	}
+	loadSkyDome.LoadDataStructures(filename, vertexCount, textureCount, normalCount, faceCount);
+
 	//read the vertex count
-	fin >> m_vertexCount;
+	m_vertexCount = ((faceCount * 3)+1);
 	//set the  number of indices to be the same as the vertex count
 	m_indexCount = m_vertexCount;
 	//Create the model using th vertex xount tht was read in
-	m_model = new ModelType[m_vertexCount];
+	m_model = new ModelParserClass::ModelType[m_vertexCount];
 	if (!m_model)
 	{
 		return false;
 	}
 	//Read up to the beginning of the data
-	fin.get(input);
-	while (input != ':')
-	{
-		fin.get(input);
-	}
-	fin.get(input);
-	fin.get(input);
-	//Read the vertex data
-	for (i = 0; i < m_vertexCount; i++)
-	{
-		fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
-		fin >> m_model[i].tu >> m_model[i].tv;
-		fin >> m_model[i].nx >> m_model[i].ny >> m_model[i].nz;
-	}
-	//close the model gile
-	fin.close();
+	m_model = loadSkyDome.model;
 	return true;
 }
 

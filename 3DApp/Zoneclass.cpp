@@ -66,8 +66,8 @@ bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int s
 	{
 		return false;
 	}
-	// Set the initial position and rotation the terrain x(from 0 to 256)and z(0 to 256).
-	m_Position->SetPosition(128.0f, 10.0f, 128.0f);
+	// Set the initial position and rotation of the camera
+	m_Position->SetPosition(512.0f, 100.0f, 512.0f);
 	m_Position->SetRotation(0.0f, 0.0f, 0.0f);
 
 	// Create the terrain object.
