@@ -7,8 +7,6 @@ TerrainShaderClass::TerrainShaderClass()
 	m_layout = 0;
 	m_matrixBuffer = 0;
 	m_sampleState = 0;
-	m_lightBuffer = 0;
-	m_cameraBuffer = 0;
 }
 
 TerrainShaderClass::TerrainShaderClass(const TerrainShaderClass& other)
@@ -232,63 +230,11 @@ bool TerrainShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 		return false;
 	}
 
-	// Setup the description of the camera dynamic constant buffer that is in the vertex shader.
-	/*cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
-	cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cameraBufferDesc.MiscFlags = 0;
-	cameraBufferDesc.StructureByteStride = 0;*/
-	// Create the camera constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	//result = device->CreateBuffer(&cameraBufferDesc, NULL, &m_cameraBuffer);
-	//if (FAILED(result))
-	//{
-	//	return false;
-	//}
-	//// Setup the description of the light dynamic constant buffer that is in the pixel shader.
-	//ZeroMemory(&lightBufferDesc, sizeof(D3D11_BLEND_DESC));
-	//lightBufferDesc.AlphaToCoverageEnable = false;
-	//lightBufferDesc.IndependentBlendEnable = false;
-	//lightBufferDesc.RenderTarget[0].BlendEnable = true;
-	//lightBufferDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-	//lightBufferDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-	//lightBufferDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	//lightBufferDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	//lightBufferDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-	//lightBufferDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	//lightBufferDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	/*lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
-	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	lightBufferDesc.MiscFlags = 0;
-	lightBufferDesc.StructureByteStride = 0;
-*/
-	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	//result = device->CreateBlendState(&lightBufferDesc, &m_lightBuffer);
-	//if (FAILED(result))
-	//{
-	//	return false;
-	//}
-
 	return true;
 }
 
 void TerrainShaderClass::ShutdownShader()
 {
-	// Release the light constant buffer.
-	//if (m_lightBuffer)
-	//{
-	//	m_lightBuffer->Release();
-	//	m_lightBuffer = 0;
-	//}
-	// Release the camera constant buffer.
-	//if (m_cameraBuffer)
-	//{
-	//	m_cameraBuffer->Release();
-	//	m_cameraBuffer = 0;
-	//}
 	// Release the sampler state.
 	if (m_sampleState)
 	{
@@ -369,10 +315,6 @@ bool TerrainShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 	MatrixBufferType* dataPtr;
 	unsigned int bufferNumber;
 
-	//LightBufferType* dataPtr1;
-	//CameraBufferType* dataPtr3;
-
-
 	// Transpose the matrices to prepare them for the shader.
 	worldMatrix = XMMatrixTranspose(worldMatrix);
 	viewMatrix = XMMatrixTranspose(viewMatrix);
@@ -402,54 +344,10 @@ bool TerrainShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 	// Finanly set the constant buffer in the vertex shader with the updated values.
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
-	// Lock the camera constant buffer so it can be written to.
-	//result = deviceContext->Map(m_cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	//if (FAILED(result))
-	//{
-	//	return false;
-	//}
-
-	// Get a pointer to the data in the constant buffer.
-	//dataPtr3 = (CameraBufferType*)mappedResource.pData;
-
-	//// Copy the camera position into the constant buffer.
-	//dataPtr3->cameraPosition = cameraPosition;
-	//dataPtr3->padding = 0.0f;
-
-	// Unlock the camera constant buffer.
-	//deviceContext->Unmap(m_cameraBuffer, 0);
-	// Set the position of the camera constant buffer in the vertex shader.
-	//bufferNumber = 1;
-
-	// Now set the camera constant buffer in the vertex shader with the updated values.
-	//deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_cameraBuffer);
-
 	// Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &texture);
 	//deviceContext->PSSetShaderResources(1, 1, &normalMap);
 
-	// Lock the light constant buffer so it can be written to.
-	/*result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if (FAILED(result))
-	{
-		return false;
-	}*/
-	// Get a pointer to the data in the light constant buffer.
-	//dataPtr1 = (LightBufferType*)mappedResource.pData;
-	//// Copy the lighting variables into the constant buffer.
-	//dataPtr1->diffuseColor = diffuseColor;
-	//dataPtr1->lightDirection = lightDirection;
-	//dataPtr1->specularColor = specularColor;
-	//dataPtr1->specularPower = specularPower;
-	//dataPtr1->padding = 0.0f;
-	//float blendFctor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	//// Unlock the light constant buffer.
-	////deviceContext->Unmap(m_lightBuffer, 0);
-	//// Set the position of the light constant buffer in the pixel shader.
-	//bufferNumber = 0;
-	//// Finally set the light constant buffer in the pixel shader with the updated values.
-	////deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
-	//deviceContext->OMSetBlendState(m_lightBuffer, blendFctor, 0xffffffff);
 
 	return true;
 }

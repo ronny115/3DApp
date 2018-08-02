@@ -59,7 +59,7 @@ bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int s
 		return false;
 	}
 	//Set the initial direction on the sunLight to calculate the radius for circular movement
-	m_Light->SetDirection(0.f, 0.0f, 1.0f);
+	m_Light->SetDirection(0.0f, 0.0f, 1.0f);
 	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	//m_Light->SetSpecularColor(0.0f, 0.0f, 0.0f, 0.0f);
 	//m_Light->SetSpecularPower(32000.0f);
@@ -477,16 +477,6 @@ bool ZoneClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager, Te
 	FullScreenWindow->Render(Direct3D->GetDeviceContext());
 	m_LightShader->Render(Direct3D->GetDeviceContext(), FullScreenWindow->GetIndexCount(), worldMatrix, baseViewMatrix, orthoMatrix, m_DeferredBuffers->GetShaderResourceView(0), m_DeferredBuffers->GetShaderResourceView(1), m_Light->GetDirection());
 	
-	//sky dome centerd arround the camera
-	//worldMatrix = XMMatrixTranslation(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-	////render the skydome using the skydome shader
-	//m_SkyDome->Render(Direct3D->GetDeviceContext());
-	//result = ShaderManager->RenderSkyDomeShader(Direct3D->GetDeviceContext(), m_SkyDome->GetIndexCount(),worldMatrix,viewMatrix,projectionMatrix,m_SkyDome->GetApexColor(),m_SkyDome->GetCenterColor());
-	//if (!result)
-	//{
-	//	return false;
-	//}
-
 	//Turn the zbuffer and culling back on
 	Direct3D->TurnZBufferOn();
 
