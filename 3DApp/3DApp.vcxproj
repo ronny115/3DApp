@@ -153,6 +153,7 @@
     <ClInclude Include="colorshaderclass.h" />
     <ClInclude Include="cpuclass.h" />
     <ClInclude Include="d3dclass.h" />
+    <ClInclude Include="deferredBuffersClass.h" />
     <ClInclude Include="fontclass.h" />
     <ClInclude Include="fontshaderclass.h" />
     <ClInclude Include="fpsclass.h" />
@@ -160,6 +161,7 @@
     <ClInclude Include="lightclass.h" />
     <ClInclude Include="lightshaderclass.h" />
     <ClInclude Include="ModelParserClassHeader.h" />
+    <ClInclude Include="orthonWindowClass.h" />
     <ClInclude Include="positionclass.h" />
     <ClInclude Include="shadermanagerclass.h" />
     <ClInclude Include="SkyDomeClass.h" />
@@ -184,6 +186,7 @@
     <ClCompile Include="Colorshaderclass.cpp" />
     <ClCompile Include="Cpuclass.cpp" />
     <ClCompile Include="D3dclass.cpp" />
+    <ClCompile Include="deferredBuffersClass.cpp" />
     <ClCompile Include="Fontclass.cpp" />
     <ClCompile Include="Fontshaderclass.cpp" />
     <ClCompile Include="Fpsclass.cpp" />
@@ -191,6 +194,7 @@
     <ClCompile Include="lightclass.cpp" />
     <ClCompile Include="Lightshaderclass.cpp" />
     <ClCompile Include="ModelParserClass.cpp" />
+    <ClCompile Include="orthoWindowClass.cpp" />
     <ClCompile Include="Positionclass.cpp" />
     <ClCompile Include="Shadermanagerclass.cpp" />
     <ClCompile Include="SkyDomeClass.cpp" />

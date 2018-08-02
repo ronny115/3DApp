@@ -95,7 +95,17 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	{
 	return false;
 	}
-
+	m_FullScreenWindow = new OrthoWindowClass;
+	if (!m_FullScreenWindow)
+	{
+		return false;
+	}
+	result = m_FullScreenWindow->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the full screen ortho window object.", L"Error", MB_OK);
+		return false;
+	}
 	// Create the timer object.
 	m_Timer = new TimerClass;
 	if(!m_Timer)
@@ -138,7 +148,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	}
 
 	// Initialize the zone object.
-	result = m_Zone->Initialize(m_Direct3D, hwnd, screenWidth, screenHeight, SCREEN_DEPTH);
+	result = m_Zone->Initialize(m_Direct3D, hwnd, screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_DEPTH);
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the zone object.", L"Error", MB_OK);
@@ -161,6 +171,13 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 void ApplicationClass::Shutdown()
 {
 	//Release the sound object
+	if (m_FullScreenWindow)
+	{
+		m_FullScreenWindow->Shutdown();
+		delete m_FullScreenWindow;
+		m_FullScreenWindow = 0;
+	}
+
 	if (m_Sound)
 	{
 		m_Sound->Shutdown();
@@ -257,7 +274,7 @@ bool ApplicationClass::Frame()
 	}
 
 	// Do the zone frame processing.
-	result = m_Zone->Frame(m_Direct3D, m_Input, m_ShaderManager, m_TextureManager, m_Timer->GetTime(), m_Fps->GetFps(), m_Cpu->GetCpuPercentage());
+	result = m_Zone->Frame(m_Direct3D, m_Input, m_ShaderManager, m_TextureManager, m_FullScreenWindow, m_Timer->GetTime(), m_Fps->GetFps(), m_Cpu->GetCpuPercentage());
 	if (!result)
 	{
 		return false;

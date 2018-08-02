@@ -12,6 +12,8 @@
 #include "terrainclass.h"
 #include "SkyDomeClass.h"
 #include "VectorsClassHeader.h"
+#include "deferredBuffersClass.h"
+#include "orthonWindowClass.h"
 
 class ZoneClass
 {
@@ -20,14 +22,15 @@ public:
 	ZoneClass(const ZoneClass&);
 	~ZoneClass();
 
-	bool Initialize(D3DClass*, HWND, int, int, float);
+	bool Initialize(D3DClass*, HWND, int, int, float, float);
 	void Shutdown();
-	bool Frame(D3DClass*, InputClass*, ShaderManagerClass*, TextureManagerClass*, float, int, int);
+	bool Frame(D3DClass*, InputClass*, ShaderManagerClass*, TextureManagerClass*, OrthoWindowClass*, float, int, int);
 
 private:
 	void HandleMovementInput(InputClass*, float);
 	void LightMovement(float);
-	bool Render(D3DClass*, ShaderManagerClass*, TextureManagerClass*);
+	bool Render(D3DClass*, ShaderManagerClass*, TextureManagerClass*, OrthoWindowClass*);
+	bool RenderSceneToTexture(D3DClass*, ShaderManagerClass*, TextureManagerClass*);
 
 	UserInterfaceClass* m_UserInterface;
 	CameraClass* m_Camera;
@@ -37,6 +40,8 @@ private:
 	SkyDomeClass * m_SkyDome;
 	Vector3 * linearInterp;
 	Vector2 * sLinearInterp;
+	DeferredBuffersClass * m_DeferredBuffers;
+	LightShaderClass* m_LightShader;
 
 	bool m_displayUI, m_wireFrame;
 	float m_frameTime;

@@ -9,6 +9,7 @@
 #include "zoneclass.h"
 #include "cpuclass.h"
 #include "soundclass.h"
+#include "orthonWindowClass.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -31,6 +32,7 @@ private:
 	D3DClass* m_Direct3D;
 	ShaderManagerClass* m_ShaderManager;
 	TextureManagerClass* m_TextureManager;
+	OrthoWindowClass* m_FullScreenWindow;
 	TimerClass* m_Timer;
 	FpsClass* m_Fps;
 	ZoneClass* m_Zone;

@@ -156,6 +156,7 @@ bool SkyDomeShaderClass::InitializeShader(ID3D11Device * device, HWND hwnd, WCHA
 void SkyDomeShaderClass::ShutdownShader()
 {
 	// Release the pixel constant buffer.
+
 	if (m_colorBuffer)
 	{
 		m_colorBuffer->Release();
